@@ -206,6 +206,8 @@ class Experiment():
         else:
             raise ValueError('images should either be string or list')
 
+        print('Found {} images: \n'.format(len(self.images)))
+
         if isinstance(rois, basestring):
             if rois[-3:] == 'zip':
                 self.rois = [rois] * len(self.images)
@@ -217,6 +219,9 @@ class Experiment():
                 self.rois *= len(self.images)
         else:
             raise ValueError('rois should either be string or list')
+
+        print('np.shape(self.rois): {}\n'.format(np.shape(self.rois)))
+
         global datahandler
         if lowmemory_mode:
             from . import datahandler_framebyframe as datahandler
@@ -298,6 +303,7 @@ class Experiment():
 
         if redo:
             print('Doing region growing and data extraction....')
+            print('\t nTrials: {}\n\t nRegions: {}\n'.format(self.nTrials, self.nRegions))
             # define inputs
             inputs = [0] * self.nTrials
             for trial in range(self.nTrials):
@@ -326,7 +332,7 @@ class Experiment():
 
             else:
                 results = [0] * self.nTrials
-                for trial in range(self.nTrials):
+                for trial in range(self.nTrials): # Loop through each image and call extract_func(...) on it
                     results[trial] = extract_func(inputs[trial])
 
             # get number of cells

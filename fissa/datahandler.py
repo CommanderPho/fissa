@@ -78,6 +78,8 @@ def rois2masks(rois, data):
     # get the image shape
     shape = data.shape[1:]
 
+    
+
     # if it's a list of strings
     if isinstance(rois, basestring):
         rois = roitools.readrois(rois)
@@ -87,6 +89,9 @@ def rois2masks(rois, data):
             'Wrong ROIs input format: expected a list or sequence, but got'
             ' a {}'.format(rois.__class__)
         )
+
+
+    print('rois2masks(...):\n data.shape[1:]: {}\n np.shape(rois[0]): {}\n'.format(shape, np.shape(rois[0])))
 
     # if it's a something by 2 array (or vice versa), assume polygons
     if np.shape(rois[0])[1] == 2 or np.shape(rois[0])[0] == 2:
