@@ -1,10 +1,8 @@
 """
-Basic FISSA usage example.
+Basic FISSA Neuropil Removal Script.
 
-This file contains a step-by-step example workflow for using the FISSA toolbox.
+Pho Hale, Pierre Lab 12-17-2020
 
-An example notebook is provided here:
-https://github.com/rochefort-lab/fissa/blob/master/examples/Basic%20usage.ipynb
 """
 
 import fissa
