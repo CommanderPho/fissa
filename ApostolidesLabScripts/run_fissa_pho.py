@@ -17,34 +17,16 @@ from pathlib import Path
 # Custom Datahandler import:
 import datahandler_pho_suite2p as active_custom_datahandler_obj
 
-def load_experiment_object(path):
-    filehandler = open(path, 'r')
-    object = pickle.load(filehandler)
-    return object
+# def load_experiment_object(path):
+#     filehandler = open(path, 'r')
+#     object = pickle.load(filehandler)
+#     return object
+#
+# def save_experiment_object(exp, path):
+#     file_out = open(path, 'w')
+#     pickle.dump(exp, file_out)
 
-def save_experiment_object(exp, path):
-    file_out = open(path, 'w')
-    pickle.dump(exp, file_out)
-
-
-
-# On Windows, it is necessary to wrap the script in a __name__ check, so
-# that multiprocessing works correctly. Multiprocessing is triggered by the
-# experiment.separate() step.
-if __name__ == '__main__':
-    # Define the data to extract
-    root_folder_path = Path(r'E:\PhoHaleScratchFolder\202001_17-20-24_PassiveStim_Registered\suite2p\plane0')
-    imaging_frequency_Hz = 30
-
-    images_path = root_folder_path.joinpath('reg_tif')
-    output_folder_path =  root_folder_path.joinpath('fissa_suite2p_example')
-    # output_file_experiment_path = output_folder_path.joinpath('experiment.npy')
-    # output_file_experiment_path = output_folder_path.joinpath('experiment.obj')
-    output_file_experiment_path = output_folder_path.joinpath('experiment.npz')
-
-    images_path_str = str(images_path.resolve())
-    output_folder_path_str = str(output_folder_path.resolve())
-
+def load_suite2p_results(root_folder_path):
     print(
         'Loading Suite2p Output Results from:\n \t\t {}\n \t\t {}\n \t\t {}\n\n'.format(
             root_folder_path.joinpath('stat.npy'), root_folder_path.joinpath('ops.npy'),
@@ -77,26 +59,46 @@ if __name__ == '__main__':
         xpix = stat[n]['xpix'][~stat[n]['overlap']]
         rois[i][ypix, xpix] = 1
 
+    return rois
+
+# On Windows, it is necessary to wrap the script in a __name__ check, so
+# that multiprocessing works correctly. Multiprocessing is triggered by the
+# experiment.separate() step.
+if __name__ == '__main__':
+    # Define the data to extract
+    root_folder_path = Path(r'E:\PhoHaleScratchFolder\202001_17-20-24_PassiveStim_Registered\suite2p\plane0')
+    imaging_frequency_Hz = 30
+    rois = load_suite2p_results(root_folder_path)
+
+    images_path = root_folder_path.joinpath('reg_tif')
+    output_folder_path =  root_folder_path.joinpath('fissa_suite2p_example')
+    # output_file_experiment_path = output_folder_path.joinpath('experiment.npy')
+    # output_file_experiment_path = output_folder_path.joinpath('experiment.obj')
+    # output_file_experiment_path = output_folder_path.joinpath('experiment.npz')
+
+    images_path_str = str(images_path.resolve())
+    output_folder_path_str = str(output_folder_path.resolve())
+
     # Instantiate a fissa experiment object
     experiment = fissa.Experiment(images_path_str, [rois], output_folder_path_str, datahandler_custom = active_custom_datahandler_obj, ncores_preparation = 1)
 
 
     # Run the FISSA separation algorithm
     print('Starting FISSA separation processing. This may take several hours...\n \t Results will be written to:\n \t\t {}\n \t\t {}\n\n'.format(output_folder_path.joinpath('matlab.mat'), output_folder_path.joinpath('preparation.npy'), output_folder_path.joinpath('separated.npy')))
-    experiment.separate()
+    # experiment.separate()
 
     # Export to a .mat file which can be opened with MATLAB (optional)
     print('Saving separation results as .mat file at {}\n'.format(output_folder_path.joinpath('matlab.mat')))
-    experiment.save_to_matlab()
+    # experiment.save_to_matlab()
 
-    print('Saving full experiment results out to disk at {}\n'.format(output_file_experiment_path))
-    # Save the full experiment out to disk:
-    np.save(output_file_experiment_path, experiment)
+    # print('Saving full experiment results out to disk at {}\n'.format(output_file_experiment_path))
+    # # Save the full experiment out to disk:
+    # np.save(output_file_experiment_path, experiment)
 
     print('Calculating deltaf (this should take a few minutes)...\n')
-    experiment.calc_deltaf(imaging_frequency_Hz)
+    # experiment.calc_deltaf(imaging_frequency_Hz)
 
     print('Saving updated .mat file results at {}\n'.format(output_folder_path.joinpath('matlab_deltaf.mat')))
-    experiment.save_to_matlab('matlab_deltaf.mat')
+    # experiment.save_to_matlab('matlab_deltaf.mat')
 
     # save_experiment_object(experiment, output_file_experiment_path)

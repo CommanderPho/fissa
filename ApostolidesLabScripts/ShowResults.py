@@ -51,6 +51,13 @@ def export_experiment_npz(experiment_obj, save_parent_path, should_save_separate
 
 
 
+
+
+# updated_output_folder_path =  root_folder_path.joinpath('fissa_suite2p_updated')
+# export_experiment_npz(experiment, updated_output_folder_path, should_save_separate_npzs=False)
+# output_file_updated_experiment_path = updated_output_folder_path.joinpath('experiment.npy')
+
+
 # export_experiment_npz(experiment, output_file_experiment_path)
 
 # np.savez_compressed(output_folder_path.joinpath('experiment_deltaf.npz'), deltaf_raw=experiment.deltaf_raw,

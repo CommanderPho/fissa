@@ -688,11 +688,23 @@ class Experiment():
 
             return out_npz_array
 
-        def export_experiment_npz_uncompressed(experiment_obj, save_parent_path, custom_filename_prefix='experiment', should_save_separate_npzs=False):
+        def export_difficult_variables(experiment_obj, save_parent_path, custom_filename_prefix='experiment', save_compressed=True):
             # Note: Currently skips experiment.raw and experiment.sep, as they are non nparray lists, so they can't be directly saved with np.savez_compressed without conversion
             raw_np = reformat_dict_for_npz(experiment_obj.raw)
             sep_np = reformat_dict_for_npz(experiment_obj.sep)
+            print('\t saving npz containing the difficult variables (raw, sep) to {}...\n'.format(
+                save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix))))
+            if save_compressed:
+                np.savez_compressed(save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix)),
+                                    raw=raw_np,
+                                    sep=sep_np)
+            else:
+                np.savez(save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix)),
+                                        raw=raw_np,
+                                        sep=sep_np)
 
+        def export_experiment_npz_uncompressed(experiment_obj, save_parent_path, custom_filename_prefix='experiment', should_save_separate_npzs=False):
+            # Note: Currently skips experiment.raw and experiment.sep, as they are non nparray lists, so they can't be directly saved with np.savez_compressed without conversion
             if should_save_separate_npzs:
                 print('Saving separate experiment npz to path {} with prefix {}...\n'.format(save_parent_path, custom_filename_prefix))
                 print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('{}_main.npz'.format(custom_filename_prefix))))
@@ -707,11 +719,6 @@ class Experiment():
                                         deltaf_raw=experiment_obj.deltaf_raw,
                                         deltaf_result=experiment_obj.deltaf_result)
 
-
-                print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix))))
-                np.savez(save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix)),
-                                        raw=raw_np,
-                                        sep=sep_np)
             else:
                 print('Saving experiment npz to {}...\n'.format(save_parent_path.joinpath('{}.npz'.format(custom_filename_prefix))))
                 if ((getattr(experiment_obj, 'deltaf_raw', None) is not None) and (
@@ -720,21 +727,19 @@ class Experiment():
                     np.savez(save_parent_path.joinpath('{}.npz'.format(custom_filename_prefix)), roi_polys=experiment_obj.roi_polys,
                                         result=experiment_obj.result, info=experiment_obj.info,
                                         means=experiment_obj.means, deltaf_raw=experiment_obj.deltaf_raw,
-                                        deltaf_result=experiment_obj.deltaf_result,
-                                        raw=raw_np,
-                                        sep=sep_np)
+                                        deltaf_result=experiment_obj.deltaf_result)
+
 
                 else:
                     np.savez(save_parent_path.joinpath('{}.npz'.format(custom_filename_prefix)), roi_polys=experiment_obj.roi_polys,
                                         result=experiment_obj.result, info=experiment_obj.info,
-                                        means=experiment_obj.means, raw=raw_np, sep=sep_np)
+                                        means=experiment_obj.means)
 
+            export_difficult_variables(experiment_obj, save_parent_path, custom_filename_prefix=custom_filename_prefix,
+                                           save_compressed=False)
 
         def export_experiment_npz(experiment_obj, save_parent_path, custom_filename_prefix='experiment', should_save_separate_npzs=False):
             # Note: Currently skips experiment.raw and experiment.sep, as they are non nparray lists, so they can't be directly saved with np.savez_compressed without conversion
-            raw_np = reformat_dict_for_npz(experiment_obj.raw)
-            sep_np = reformat_dict_for_npz(experiment_obj.sep)
-
             if should_save_separate_npzs:
                 print('Saving separate experiment npz to path {} with prefix {}...\n'.format(save_parent_path, custom_filename_prefix))
                 print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('{}_main.npz'.format(custom_filename_prefix))))
@@ -749,11 +754,6 @@ class Experiment():
                                         deltaf_raw=experiment_obj.deltaf_raw,
                                         deltaf_result=experiment_obj.deltaf_result)
 
-
-                print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix))))
-                np.savez_compressed(save_parent_path.joinpath('{}_difficult.npz'.format(custom_filename_prefix)),
-                                        raw=raw_np,
-                                        sep=sep_np)
             else:
                 print('Saving experiment npz to {}...\n'.format(save_parent_path.joinpath('{}.npz'.format(custom_filename_prefix))))
                 if ((getattr(experiment_obj, 'deltaf_raw', None) is not None) and (
@@ -762,14 +762,16 @@ class Experiment():
                     np.savez_compressed(save_parent_path.joinpath('{}.npz'.format(custom_filename_prefix)), roi_polys=experiment_obj.roi_polys,
                                         result=experiment_obj.result, info=experiment_obj.info,
                                         means=experiment_obj.means, deltaf_raw=experiment_obj.deltaf_raw,
-                                        deltaf_result=experiment_obj.deltaf_result,
-                                        raw=raw_np,
-                                        sep=sep_np)
+                                        deltaf_result=experiment_obj.deltaf_result)
 
                 else:
                     np.savez_compressed(save_parent_path.joinpath('{}.npz'.format(custom_filename_prefix)), roi_polys=experiment_obj.roi_polys,
                                         result=experiment_obj.result, info=experiment_obj.info,
-                                        means=experiment_obj.means, raw=raw_np, sep=sep_np)
+                                        means=experiment_obj.means)
+
+            export_difficult_variables(experiment_obj, save_parent_path, custom_filename_prefix=custom_filename_prefix,
+                                           save_compressed=True)
+
 
         export_experiment_npz(self, save_path, should_save_separate_npzs)
         print('done.')
