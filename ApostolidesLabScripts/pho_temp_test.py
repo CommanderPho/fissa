@@ -141,6 +141,12 @@ def export_experiment_npz(experiment_obj, save_parent_path, custom_filename_pref
                                save_compressed=True)
 
 
+def export_roi_masks(roi_polys, roi_masks, save_parent_path, custom_filename_prefix='experiment'):
+    np.savez_compressed(save_parent_path.joinpath('{}_roi_masks.npz'.format(custom_filename_prefix)),
+                        roi_polys=roi_polys,
+                        roi_masks=roi_masks)
+
+
 def import_experiment_npzs(save_directory):
     output_file_experiment_path = save_directory.joinpath('experiment.npy')
     output_file_difficult_experiment_path = save_directory.joinpath('experiment_difficult.npy')
@@ -197,23 +203,14 @@ def getmasks(rois, shpe):
 
     return masks
 
-
 def reformat_polygons_to_masks(polys):
-
     output_masks = getmasks(polys, (512, 512))
-    # >>> poly1 = [[0,0], [0,1], [1,1], [1,0]]
-    # >>> poly2 = [[0,1], [0,2], [2,2], [2,1]]
-    # out_masks = np.zeros((512, 512))
-    # out_masks = np.zeros_like(polys[0][0][0][0])
-    # for cell_index in range(len(polys)):
-    #     curr_cell_mask = polys[0]
-    #     curr_poly = polys[cell_index][0][0][0]
-    #     mask = poly2mask(curr_poly, (512, 512))
-    #     mask[0].todense()
-
     return output_masks
 
 
 if __name__ == '__main__':
     export_experiment_npz(experiment, save_path, should_save_separate_npzs=False)
+
+    # export_roi_masks(experiment.roi_polys, out_masks, save_parent_path, custom_filename_prefix='experiment')
+
     print('done.')

@@ -12,8 +12,12 @@ import numpy as np
 
 # Plotting toolbox, with notebook embedding options
 import holoviews as hv
-%load_ext holoviews.ipython
-%output widgets='embed'
+from holoviews import opts
+hv.extension('bokeh')
+from bokeh.plotting import show
+
+# %load_ext holoviews.ipython
+# %output widgets='embed'
 
 
 # def export_experiment_npz(experiment_obj, save_path):
@@ -22,36 +26,32 @@ import holoviews as hv
 #                                 means=experiment_obj.means, sep=experiment_obj.sep, deltaf_raw=experiment_obj.deltaf_raw, deltaf_result=experiment_obj.deltaf_result)
 #     print('done.')
 
-
-def export_experiment_npz(experiment_obj, save_parent_path, should_save_separate_npzs=False):
-    # Note: Currently skips experiment.raw and experiment.sep, as they are non nparray lists, so they can't be directly saved with np.savez_compressed without conversion
-    if should_save_separate_npzs:
-        print('Saving separate experiment npz to path {}...\n'.format(save_parent_path))
-        print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('experiment_main.npz')))
-        np.savez_compressed(save_parent_path.joinpath('experiment_main.npz'), roi_polys=experiment_obj.roi_polys,
-                            result=experiment_obj.result, info=experiment_obj.info,
-                            means=experiment_obj.means)
-        if experiment_obj.deltaf_result is not None:
-            print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('experiment_deltaf.npz')))
-            np.savez_compressed(save_parent_path.joinpath('experiment_deltaf.npz'), deltaf_raw=experiment_obj.deltaf_raw,
-                                deltaf_result=experiment_obj.deltaf_result)
-    else:
-        print('Saving experiment npz to {}...\n'.format(save_parent_path.joinpath('experiment.npz')))
-        if experiment_obj.deltaf_result is not None:
-            np.savez_compressed(save_parent_path.joinpath('experiment.npz'), roi_polys=experiment_obj.roi_polys,
-                                result=experiment_obj.result, info=experiment_obj.info,
-                                means=experiment_obj.means, deltaf_raw=experiment_obj.deltaf_raw,
-                                deltaf_result=experiment_obj.deltaf_result)
-        else:
-            np.savez_compressed(save_parent_path.joinpath('experiment.npz'), roi_polys=experiment_obj.roi_polys,
-                                result=experiment_obj.result, info=experiment_obj.info,
-                                means=experiment_obj.means)
-
-    print('done.')
-
-
-
-
+#
+# def export_experiment_npz(experiment_obj, save_parent_path, should_save_separate_npzs=False):
+#     # Note: Currently skips experiment.raw and experiment.sep, as they are non nparray lists, so they can't be directly saved with np.savez_compressed without conversion
+#     if should_save_separate_npzs:
+#         print('Saving separate experiment npz to path {}...\n'.format(save_parent_path))
+#         print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('experiment_main.npz')))
+#         np.savez_compressed(save_parent_path.joinpath('experiment_main.npz'), roi_polys=experiment_obj.roi_polys,
+#                             result=experiment_obj.result, info=experiment_obj.info,
+#                             means=experiment_obj.means)
+#         if experiment_obj.deltaf_result is not None:
+#             print('\t saving npz to {}...\n'.format(save_parent_path.joinpath('experiment_deltaf.npz')))
+#             np.savez_compressed(save_parent_path.joinpath('experiment_deltaf.npz'), deltaf_raw=experiment_obj.deltaf_raw,
+#                                 deltaf_result=experiment_obj.deltaf_result)
+#     else:
+#         print('Saving experiment npz to {}...\n'.format(save_parent_path.joinpath('experiment.npz')))
+#         if experiment_obj.deltaf_result is not None:
+#             np.savez_compressed(save_parent_path.joinpath('experiment.npz'), roi_polys=experiment_obj.roi_polys,
+#                                 result=experiment_obj.result, info=experiment_obj.info,
+#                                 means=experiment_obj.means, deltaf_raw=experiment_obj.deltaf_raw,
+#                                 deltaf_result=experiment_obj.deltaf_result)
+#         else:
+#             np.savez_compressed(save_parent_path.joinpath('experiment.npz'), roi_polys=experiment_obj.roi_polys,
+#                                 result=experiment_obj.result, info=experiment_obj.info,
+#                                 means=experiment_obj.means)
+#
+#     print('done.')
 
 # updated_output_folder_path =  root_folder_path.joinpath('fissa_suite2p_updated')
 # export_experiment_npz(experiment, updated_output_folder_path, should_save_separate_npzs=False)
@@ -90,6 +90,7 @@ def plot_cell_regions(roi_polys, plot_neuropil=False):
     return out
 
 def generate_plots_from_variables(roi_polys, raw, result, means):
+    #hv.extension('matplotlib') # Set the hv backend
     i_trial = 0
     nCell = np.shape(roi_polys)[0]
 
@@ -118,10 +119,18 @@ def generate_plots_from_variables(roi_polys, raw, result, means):
         cell_locs *= hv.Curve(zip(x, y))
 
     # Render holoviews
-    avg_img * cell_locs * hv.HoloMap(region_plots, kdims=['Cell']) + hv.HoloMap(traces_plots, kdims=['Cell'])
+    ## avg_img * cell_locs * hv.HoloMap(region_plots, kdims=['Cell']) + hv.HoloMap(traces_plots, kdims=['Cell'])
+
+    layout = avg_img * cell_locs * hv.HoloMap(region_plots, kdims=['Cell']) + hv.HoloMap(traces_plots, kdims=['Cell'])
+
+    renderer.save(curve, '/tmp/test', fmt='png')
+
+    show(hv.render(layout))
+    return layout
+    # hv.output(layout, backend='matplotlib', fig='svg')
 
 def generate_plots(experiment):
-    generate_plots_from_variables(experiment.roi_polys, experiment.raw, experiment.result, experiment.means)
+    return generate_plots_from_variables(experiment.roi_polys, experiment.raw, experiment.result, experiment.means)
 
 def generate_plots_from_loaded_experiment_npz(loaded_npz_data):
     generate_plots_from_variables(loaded_npz_data['roi_polys'], loaded_npz_data['raw'], loaded_npz_data['result'], loaded_npz_data['means'])
